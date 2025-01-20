@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "jsx": "react",
+    "esModuleInterop": true,
+    "strictNullChecks": true
+  }
+}

@@ -1,0 +1,100 @@
+
+import json
+import pprint
+import urllib3
+import sseclient
+import json
+import string
+import random
+
+URL_BASE = "http://localhost:8080/api"
+URL_
+
+
+def with_urllib3(url, headers):
+    """Get a streaming response for the given event feed using urllib3."""
+    
+    http = urllib3.PoolManager()
+    return http.request('GET', url, preload_content=False, headers=headers)
+
+class User:
+    def __init__(self, userId, username) -> None:
+        self.userId = userId
+        self.username = username
+
+def rand(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+def createRequest(type, url, data={}, auth=None):
+    http = urllib3.PoolManager()
+    headers = {"Content-Type": "application/json"}
+    if auth:
+        headers["Authorization"] = "Bearer "+auth
+    return http.request(type, url, body=json.dumps(data), headers=headers, preload_content=False)
+
+def createUser(username: str, password: str):
+    body = {"username": username, "password": password}
+    response = createRequest("POST", BASE_URL+"/user/create", body)
+    if response.status == 201:
+        result  = response.json()
+        return User(result["userId"], result["username"])
+    
+
+def login(username: str, password: str) -> str: 
+    body = {"username": username, "password": password}
+    response = createRequest("POST", BASE_URL+"/user/login", body)
+    if response.status == 200:
+        return response.json()["token"]
+    else:
+        print(response.status,": ",response.data)
+
+def createChannel(name: str, type: str, auth: str) -> str: 
+    body = {"channelName": name, "type": type}
+    response = createRequest("POST", BASE_URL+"/channel/create", body, auth)
+    if response.status == 201:
+        return response.json()
+    else:
+        print(response.status,": ",response.data)
+
+def joinChannel(chId: int, auth: str) -> str: 
+    body = {"channelId": chId}
+    response = createRequest("POST", BASE_URL+"/channel/join", body, auth)
+    if response.status == 200:
+        return None
+    else:
+        print(response.status,": ",response.data)
+
+def userChannels(auth: str) -> str: 
+    response = createRequest("GET", BASE_URL+"/user/channels",auth=auth)
+    if response.status == 200:
+        return response.json()
+    else:
+        print(response.status,": ",response.data)
+
+
+user1 = createUser("user-"+rand(), "password")
+token1 = login(user1.username, "password")
+#createChannel("channel1", "public", token1)
+#createChannel("channel1", "public", token1)
+#createChannel("channel2", "public", token1)
+#createChannel("channel3", "public", token1)
+print("userId: ", user1.userId)
+joinChannel(1, token1)
+resp = userChannels(token1)
+pprint.pprint(resp)
+
+
+def with_urllib3(url, headers):
+    """Get a streaming response for the given event feed using urllib3."""
+    import urllib3
+    http = urllib3.PoolManager()
+    return http.request('GET', url, preload_content=False, headers=headers)
+
+
+url = 'http://localhost:8080/api/user/listener'
+headers = {'Accept': 'text/event-stream', "Authorization": "Bearer "+token1}
+response = with_urllib3(url, headers)  # or with_requests(url, headers)
+client = sseclient.SSEClient(response)
+for event in client.events():
+    #pprint.pprint(json.loads(event.data))
+    pprint.pprint(event.data)

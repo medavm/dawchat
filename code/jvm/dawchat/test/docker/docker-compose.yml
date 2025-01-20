@@ -1,0 +1,21 @@
+services:
+  db-tests:
+    container_name: db-tests
+    build:
+      context: ../../ #root project directory
+      dockerfile: test/docker/tests/Dockerfile-db-test
+    environment:
+      - POSTGRES_USER=dbuser
+      - POSTGRES_PASSWORD=changeit
+      - POSTGRES_DB=db
+    ports:
+      - 5432:5432
+
+#  pgadmin4:
+#    image: dpage/pgadmin4
+#    container_name: pgadmin4
+#    environment:
+#      - PGADMIN_DEFAULT_EMAIL=user@user.com
+#      - PGADMIN_DEFAULT_PASSWORD=user
+#    ports:
+#      - 8002:80
